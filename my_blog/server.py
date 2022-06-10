@@ -1,22 +1,19 @@
 from flask import Flask, render_template
-import random, datetime
+import requests
+
 
 app = Flask(__name__)
+response = requests.get("https://api.npoint.io/c790b4d5cab58020d391").json()
 
-@app.route("/")
+
+@app.route('/')
 def home():
-    random_num = random.randint(1, 10)
-    current_year = datetime.datetime.now().year
-    return render_template("index.html", num=random_num, year=current_year)
+    return render_template("index.html", posts=response)
 
-@app.route("/guess/<name>")
-def name(name):
-    import requests
-
-    gender_response = requests.get(f"https://api.genderize.io?name={name}").json()
-    age_response = requests.get(f"https://api.agify.io?name={name}").json()
-    return render_template("age_gender.html", name=name.title(), gender=gender_response['gender'], age=age_response['age'])
+@app.route('/post/<int:num>')
+def get_post(num):
+    return render_template("post.html", posts=response, num=num)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
