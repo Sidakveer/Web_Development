@@ -1,16 +1,18 @@
 from flask import Flask, render_template
 from flask_wtf import FlaskForm
-from wtforms import StringField
+from wtforms import StringField, PasswordField, SubmitField
 
 app = Flask(__name__)
 
 
 class LoginForm(FlaskForm):
-    email = StringField("Email")
-    password = StringField("Password")
+    email = StringField(label="Email")
+    password = PasswordField(label="Password")
+    submit = SubmitField(label="Log In")
 
 
-secret_token = "any token"
+
+app.secret_key = "any token"
 
 
 @app.route("/")
@@ -20,8 +22,8 @@ def home():
 
 @app.route("/login")
 def login():
-    form = FlaskForm()
-    return render_template("login.html")
+    form = LoginForm()
+    return render_template("login.html", form=form)
 
 
 
