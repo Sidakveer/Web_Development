@@ -1,8 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, URL
 import csv
 
 app = Flask(__name__)
@@ -12,12 +12,12 @@ Bootstrap(app)
 
 class CafeForm(FlaskForm):
     cafe = StringField('Cafe name', validators=[DataRequired()])
-    location = StringField("Cafe Location on Google Maps {URL}", validators=[])
-    opening = StringField("Opening Time", validators=[])
-    closing = StringField("Closing Time", validators=[])
-    coffee = SelectField("Coffee Rating", choices=[1, 2])
-    wifi = StringField("WIFI Strength Rating", validators=[])
-    coffee = StringField("Cafe Location on Google Maps {URL}", validators=[])
+    location = StringField("Cafe Location on Google Maps {URL}", validators=[URL(), DataRequired()])
+    opening = StringField("Opening Time", validators=[DataRequired()])
+    closing = StringField("Closing Time", validators=[DataRequired()])
+    coffee = SelectField("Coffee Rating", choices=["✘", "☕", "☕☕", "☕☕☕", "☕☕☕☕", "☕☕☕☕☕"], validators=[DataRequired()])
+    wifi = SelectField("WIFI Strength Rating", choices=["✘", "💪", "💪💪", "💪💪💪", "💪💪💪💪", "💪💪💪💪💪"], validators=[DataRequired()])
+    socket = SelectField("Power Socket Availability", choices=["✘", "💪", "💪💪", "💪💪💪", "💪💪💪💪", "💪💪💪💪💪"], validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 # Exercise:
@@ -35,14 +35,16 @@ def home():
     return render_template("index.html")
 
 
-@app.route('/add')
+@app.route('/add', methods=["GET", "POST"])
 def add_cafe():
     form = CafeForm()
     if form.validate_on_submit():
-        print("True")
-    # Exercise:
-    # Make the form write a new row into cafe-data.csv
-    # with   if form.validate_on_submit()
+        with open("cafe-data.csv", "a") as file:
+            file.write(f"\n{form.cafe.data},{form.location.data},{form.opening.data},{form.closing.data},"
+                       f"{form.coffee.data},"
+                       f"{form.wifi.data},{form.socket.data}")
+        return redirect(url_for('cafes'))
+
     return render_template('add.html', form=form)
 
 
