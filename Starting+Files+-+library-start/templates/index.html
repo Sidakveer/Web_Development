@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>My Library</h1>
-{% if length == 0 %}
+{% if not books %}
 <p>Library is empty.</p>
 {% endif %}
 {% for book in books %}
