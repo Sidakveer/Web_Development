@@ -38,5 +38,13 @@ def add():
     return render_template("add.html")
 
 
+@app.route("/edit", methods=["GET", "POST"])
+def edit():
+    book_to_edit = Book.query.filter_by(id=).first()
+
+
+    return render_template("edit.html", book=book_to_edit)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
