@@ -13,6 +13,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///movies.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# ============= Api section ===============
+API_KEY = "ad78a5e9681681f51de820ce463a70b6"
+API_LINK = "https://api.themoviedb.org/3/movie/550?api_key=ad78a5e9681681f51de820ce463a70b6"
+API_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhZDc4YTVlOTY4MTY4MWY1MWRlODIwY2U0NjNhNzBiNiIsInN1YiI6IjYyYzQ3OGI4NTQ1MDhkMDA1OTYzOWY1MiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Dg_jwAIBUHpGiYfOpnMxAeWQ4MgG_vbnw5wHJYY6O1Y"
+
+
+
+
+
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), unique=True, nullable=False)
@@ -30,8 +39,12 @@ class Movie(db.Model):
 class EditForm(FlaskForm):
     rating = StringField("Your rating out of 10.")
     review = StringField("Your review.")
-    submit = SubmitField("Submit")
+    submit = SubmitField("Add Movie")
 
+
+class AddForm(FlaskForm):
+    movie = StringField("Movie Title", validators=[DataRequired()])
+    submit = SubmitField("Submit")
 
 db.create_all()
 # new_movie = Movie(
@@ -72,6 +85,12 @@ def delete():
     db.session.delete(movie)
     db.session.commit()
     return redirect(url_for("home"))
+
+
+@app.route("/add")
+def add():
+    form = AddForm()
+    return render_template("add.html", form=form)
 
 
 if __name__ == '__main__':
