@@ -21,28 +21,57 @@ class Movie(db.Model):
     rating = db.Column(db.Float, nullable=False)
     ranking = db.Column(db.Integer, nullable=False)
     review = db.Column(db.String(120), nullable=False)
-    img_url = db.Column(db.String(120), unique=True, nullable=False)
+    img_url = db.Column(db.String(120), nullable=False)
 
     def __repr__(self):
         return f'<Movie {self.title}>'
 
-# db.create_all()
-new_movie = Movie(
-    title="Phone Booth",
-    year=2002,
-    description="Publicist Stuart Shepard finds himself trapped in a phone booth, pinned down by an extortionist's sniper rifle. Unable to leave or receive outside help, Stuart's negotiation with the caller leads to a jaw-dropping climax.",
-    rating=7.3,
-    ranking=10,
-    review="My favourite character was the caller.",
-    img_url="https://image.tmdb.org/t/p/w500/tjrX2oWRCM3Tvarz38zlZM7Uc10.jpg"
-)
-db.session.add(new_movie)
-db.session.commit()
+
+class EditForm(FlaskForm):
+    rating = StringField("Your rating out of 10.")
+    review = StringField("Your review.")
+    submit = SubmitField("Submit")
+
+
+db.create_all()
+# new_movie = Movie(
+#     title="Phone Booth",
+#     year=2002,
+#     description="Publicist Stuart Shepard finds himself trapped in a phone booth, pinned down by an extortionist's sniper rifle. Unable to leave or receive outside help, Stuart's negotiation with the caller leads to a jaw-dropping climax.",
+#     rating=7.3,
+#     ranking=10,
+#     review="My favourite character was the caller.",
+#     img_url="https://image.tmdb.org/t/p/w500/tjrX2oWRCM3Tvarz38zlZM7Uc10.jpg"
+# )
+# db.session.add(new_movie)
+# db.session.commit()
 
 @app.route("/")
 def home():
     movies = db.session.query(Movie).all()
     return render_template("index.html", movies=movies)
+
+
+@app.route("/edit", methods=["GET", "POST"])
+def edit():
+    edit_form = EditForm()
+    movie_id = request.args.get("id")
+    movie = Movie.query.get(movie_id)
+    if edit_form.validate_on_submit():
+        movie.rating = float(edit_form.rating.data)
+        movie.review = edit_form.review.data
+        db.session.commit()
+        return redirect(url_for("home"))
+    return render_template("edit.html", form=edit_form, movie=movie)
+
+
+@app.route("/delete")
+def delete():
+    movie_id = request.args.get("id")
+    movie = Movie.query.get(movie_id)
+    db.session.delete(movie)
+    db.session.commit()
+    return redirect(url_for("home"))
 
 
 if __name__ == '__main__':
