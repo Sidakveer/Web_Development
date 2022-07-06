@@ -15,11 +15,7 @@ db = SQLAlchemy(app)
 
 # ============= Api section ===============
 API_KEY = "ad78a5e9681681f51de820ce463a70b6"
-API_LINK = "https://api.themoviedb.org/3/movie/550?api_key=ad78a5e9681681f51de820ce463a70b6"
-API_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhZDc4YTVlOTY4MTY4MWY1MWRlODIwY2U0NjNhNzBiNiIsInN1YiI6IjYyYzQ3OGI4NTQ1MDhkMDA1OTYzOWY1MiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Dg_jwAIBUHpGiYfOpnMxAeWQ4MgG_vbnw5wHJYY6O1Y"
-
-
-
+API_LINK = "https://api.themoviedb.org/3/search/movie"
 
 
 class Movie(db.Model):
@@ -46,7 +42,7 @@ class AddForm(FlaskForm):
     movie = StringField("Movie Title", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
-db.create_all()
+# db.create_all()
 # new_movie = Movie(
 #     title="Phone Booth",
 #     year=2002,
@@ -87,10 +83,22 @@ def delete():
     return redirect(url_for("home"))
 
 
-@app.route("/add")
+@app.route("/add", methods=["GET", "POST"])
 def add():
     form = AddForm()
+    if form.validate_on_submit():
+        response = requests.get(API_LINK, params={"api_key": API_KEY, "query": form.movie.data})
+        result = response.json()["results"]
+        return render_template("select.html", data=result)
     return render_template("add.html", form=form)
+
+
+@app.route("/select", methods=["GET", "POST"])
+def select():
+    movie_id = request.args.get("id")
+    if movie_id:
+        movie_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
+        response = request.get()
 
 
 if __name__ == '__main__':
