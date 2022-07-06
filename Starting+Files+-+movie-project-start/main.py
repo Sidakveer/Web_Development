@@ -98,8 +98,20 @@ def select():
     movie_id = request.args.get("id")
     if movie_id:
         movie_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
-        response = request.get()
-
+        response = requests.get(movie_url, params={"api_key":API_KEY, "language":"en-US"})
+        result = response.json()
+        movie = Movie(
+            title=result["original_title"],
+            year=result["release_date"].split("-")[0],
+            description=result["overview"],
+            img_url=f"https://api.themoviedb.org/3/movie/{result['poster_path']}",
+            rating=0,
+            review="0",
+            ranking=10
+        )
+        db.session.add(movie)
+        db.session.commit()
+        return redirect(url_for("home"))
 
 if __name__ == '__main__':
     app.run(debug=True)
