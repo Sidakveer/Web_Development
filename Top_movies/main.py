@@ -23,9 +23,9 @@ class Movie(db.Model):
     title = db.Column(db.String(120), unique=True, nullable=False)
     year = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(120), nullable=False)
-    rating = db.Column(db.Float, nullable=False)
-    ranking = db.Column(db.Integer, nullable=False)
-    review = db.Column(db.String(120), nullable=False)
+    rating = db.Column(db.Float, nullable=True)
+    ranking = db.Column(db.Integer, nullable=True)
+    review = db.Column(db.String(120), nullable=True)
     img_url = db.Column(db.String(120), nullable=False)
 
     def __repr__(self):
@@ -57,8 +57,11 @@ class AddForm(FlaskForm):
 
 @app.route("/")
 def home():
-    movies = db.session.query(Movie).all()
-    return render_template("index.html", movies=movies)
+    movies = Movie.query.order_by(Movie.rating).all()
+    for i in range(len(movies) - 1, -1, -1):
+        movies[i].ranking = len(movies) - i
+    db.session.commit()
+    return render_template("index.html", movies=movies[::-1])
 
 
 @app.route("/edit", methods=["GET", "POST"])
@@ -104,14 +107,15 @@ def select():
             title=result["original_title"],
             year=result["release_date"].split("-")[0],
             description=result["overview"],
-            img_url=f"https://api.themoviedb.org/3/movie/{result['poster_path']}",
-            rating=0,
-            review="0",
-            ranking=10
+            img_url=f"https://image.tmdb.org/t/p/w500{result['poster_path']}",
+            # rating=10,
+            # ranking=10,
+            # review="None"
         )
         db.session.add(movie)
         db.session.commit()
-        return redirect(url_for("home"))
+        return redirect(url_for('edit', id=movie.id))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
