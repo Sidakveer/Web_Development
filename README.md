@@ -9,3 +9,4 @@ This project uses **flask_sqlalchemy** to use a SQLite server to store data abou
 
 
 ## Top_Movies
+Here we have used all the knowledge from our previous projects in this repository and combined all the different framework and database funtionality of flask and sqlite to build a wesite where a user can select and add their favourite movies to this website and they are automatically ranked based on the personal rating given by the user.
